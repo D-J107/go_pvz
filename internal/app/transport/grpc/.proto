@@ -1,0 +1,23 @@
+
+syntax = "proto3";
+
+package grpc;
+option go_package = "/pvz";
+
+service PvzService {
+    rpc GetAllPvzs (GetAllPvzsRequest) returns (GetAllPvzsResponse);
+}
+
+
+message GetAllPvzsRequest {
+}
+
+message Pvz {
+    string id = 1;
+    string registration_date = 2;
+    string city = 3;
+}
+
+message GetAllPvzsResponse {
+    repeated Pvz pvzs = 1;
+}
