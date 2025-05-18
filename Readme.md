@@ -99,8 +99,8 @@ go test tests/integration/controller/ -v
 
 ## Docker (todo)
 
-В файлах Dockerfile и docker-compose.yml
-Запуск:
+* В файлах Dockerfile и docker-compose.yml
+* Запуск:
 ```bash
 docker-compose up --build
 ```
