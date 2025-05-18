@@ -10,7 +10,6 @@ import (
 	"my_pvz/internal/logger"
 	"net"
 	"net/http"
-	"os"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
@@ -20,17 +19,10 @@ func RunPvzServer() {
 	// Logger
 	logger.Init()
 
-	// Metrics
-
-	// Config
-	//TODO Временно
-	// os.Setenv("DATABASE_URL", "postgresql://localhost/avito_pvz_db?user=avito_user&password=qdmkio231")
-	os.Setenv("DATABASE_URL", "postgresql://localhost/avito_test_pvz_db?user=avito_test_user&password=test_qdmkio231")
-
 	// DB
 	db := db.NewDb(context.Background())
 	db.InitDb(context.Background())
-	fmt.Println("✅ Database connection successfully established and tables schema defined.")
+	logger.Log.Info("✅ Database connection successfully established and tables schema defined.")
 
 	router := SetupRoutes(db)
 	// REST
@@ -49,8 +41,7 @@ func RunPvzServer() {
 	if err != nil {
 		panic("cant establish tcp connection:" + err.Error())
 	}
-	// logger.Log.Info("gRPC server listening on port 3000")
-	fmt.Println("✅ gRPC server listening on port 3000")
+	logger.Log.Info("✅ gRPC server listening on port 3000")
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("server error: %v", err)
@@ -61,7 +52,7 @@ func RunPvzServer() {
 	prometheusMetrics.Init()
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
-		fmt.Println("✅ Prometheus metrics server running on 9000 port")
+		logger.Log.Info("✅ Prometheus metrics server running on 9000 port")
 		if err = http.ListenAndServe(":9000", nil); err != nil {
 			log.Fatalf("Prometheus server error: %v", err)
 		}

@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: avito_user
+      POSTGRES_PASSWORD: qdmkio231
+      POSTGRES_DB: avito_pvz_db
+    networks:
+      - internal
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avito_user -d avito_pvz_db"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+  pvz:
+    build: .
+    container_name: pvz-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+      - "3000:3000"
+      - "9000:9000"
+    networks:
+      - internal
+    environment:
+      DATABASE_URL: "postgresql://avito_user:qdmkio231@postgres:5432/avito_pvz_db"
+      ACCESS_TOKEN_SECRET: "a1ce5ea38835182329356a3c904d1a11aac172bfa5ccbc1e7c1209cf30bc5d17f19975d32cbb666165bd23463c4e147bc8a4e118dac9074dad686c85ac8586070394dabd1c63f2391b6920a3f1c65e7f700b0df63c53d4878e62656a4afce56bc7a0e6bdf235d6eb7c8fdcd96af86b062118c2c0229a86cff894a031bd82658a3f30efe64b5987d91a8e7b6e749b62ab051badf0dcfd84f107af7c3293c28195dde65cf82329c9ee377b07a39063c8419166d68eb42762543f662f71867a9b762786a93b450e5a9961c0b73f2493eee6cc26131270f20a2ed887449cd1032e9032bdb1f76c31000003b0c6f5e253eafb89219398ca56c3e711ce2b0a938446a9"
+      APP_PORT: "8080"
+      APP_GRPC_PORT: "3000"
+      APP_PROMETHEUS_PORT: "9000"
+    restart: unless-stopped
+  
+volumes:
+  pgdata:
+
+networks:
+  internal:
