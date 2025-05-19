@@ -6,7 +6,6 @@
 * gRPC метод получения всех ПВЗ без авторизации
 * Метрики Prometheus на порту 9000
 * OpenAPI спецификация REST API
-* CI/CD pipeline (GitHub Actions)
 
 ---
 
@@ -110,3 +109,7 @@ docker-compose up --build
 ## Схема базы данных (todo)
 
 В разработке
+
+## API схема
+
+в файле api/swagger.yaml

@@ -1,0 +1,467 @@
+openapi: 3.0.0
+info:
+  title: PVZ Management API
+  version: 1.0.0
+  description: API for managing PVZ points, receptions, and products
+
+paths:
+  /pvz:
+    post:
+      summary: Create a new PVZ
+      description: Create a new PVZ point (moderator only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PVZCreateRequest'
+      responses:
+        '200':
+          description: PVZ created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PVZResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    
+    get:
+      summary: Get PVZ list with receptions and products
+      description: Retrieve PVZ points with their receptions and products within a date range
+      parameters:
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PVZFullResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /receptions:
+    post:
+      summary: Create a new reception
+      description: Create a new reception (employee only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReceptionCreateRequest'
+      responses:
+        '200':
+          description: Reception created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceptionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /pvz/{pvzId}/close_last_reception:
+    post:
+      summary: Close the last reception for PVZ
+      description: Close the last reception for a specific PVZ (employee only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pvzId'
+      responses:
+        '200':
+          description: Reception closed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceptionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /products:
+    post:
+      summary: Create a new product
+      description: Create a new product (employee only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+      responses:
+        '200':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /pvz/{pvzId}/delete_last_product:
+    post:
+      summary: Delete the last product for PVZ
+      description: Delete the last product for a specific PVZ (employee only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pvzId'
+      responses:
+        '200':
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Товар удалён"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /login:
+    post:
+      summary: Authenticate user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /dummyLogin:
+    post:
+      summary: Dummy authentication (for testing)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DummyLoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    pvzId:
+      name: pvzId
+      in: path
+      description: ID of the PVZ
+      required: true
+      schema:
+        type: integer
+        format: int64
+    
+    startDate:
+      name: startDate
+      in: query
+      description: Start date in RFC3339 format
+      required: true
+      schema:
+        type: string
+        format: date-time
+    
+    endDate:
+      name: endDate
+      in: query
+      description: End date in RFC3339 format
+      required: true
+      schema:
+        type: string
+        format: date-time
+    
+    page:
+      name: page
+      in: query
+      description: Page number
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    
+    limit:
+      name: limit
+      in: query
+      description: Items per page
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+
+  schemas:
+    PVZCreateRequest:
+      type: object
+      required:
+        - id
+        - registrationDate
+        - city
+      properties:
+        id:
+          type: integer
+          format: int64
+        registrationDate:
+          type: string
+          format: date-time
+        city:
+          type: string
+    
+    PVZResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        registrationDate:
+          type: string
+          format: date-time
+        city:
+          type: string
+    
+    ReceptionCreateRequest:
+      type: object
+      required:
+        - pvzId
+      properties:
+        pvzId:
+          type: integer
+          format: int64
+    
+    ReceptionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        dateTime:
+          type: string
+          format: date-time
+        pvzId:
+          type: integer
+          format: int64
+        status:
+          type: string
+    
+    ProductCreateRequest:
+      type: object
+      required:
+        - type
+        - pvzId
+      properties:
+        type:
+          type: string
+        pvzId:
+          type: integer
+          format: int64
+    
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        dateTime:
+          type: string
+          format: date-time
+        type:
+          type: string
+        receptionId:
+          type: integer
+          format: int64
+    
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        role:
+          type: string
+          enum: [moderator, employee]
+    
+    RegisterResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        role:
+          type: string
+    
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+    
+    DummyLoginRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          enum: [moderator, employee]
+    
+    PVZFullResponse:
+      type: object
+      properties:
+        pvz:
+          $ref: '#/components/schemas/PVZResponse'
+        receptions:
+          type: array
+          items:
+            type: object
+            properties:
+              reception:
+                $ref: '#/components/schemas/ReceptionResponse'
+              products:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductResponse'
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
